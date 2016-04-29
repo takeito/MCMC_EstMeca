@@ -1,3 +1,3 @@
 # MCMC_EstMeca
 Estimate Meca
-This source code provided by Takeo Ito
+This source code was provided by Takeo Ito

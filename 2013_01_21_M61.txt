@@ -1,0 +1,54 @@
+8 
+4.844533568 96.12596951  6.137 -4.141  0 1 1 inf
+4.881502985 96.06772059  4.969 -5.148  0 1 1 inf
+5.017033627 95.91767111 -0.650  0.134  0 1 1 inf
+5.100482016 95.89480062 -0.379 -0.318  0 1 1 inf
+5.140244895 95.88307551  1.094  0.535  0 1 1 inf
+5.223171723 95.87201598  0.186 -1.309  0 1 1 inf
+5.366501418 95.93326925 -0.497  0.642  0 1 1 inf
+4.628370940 96.08375903 -1.824  2.416  0 1 1 inf
+%============================
+310 90  175 
+40  85    0
+6.1
+%============================
+ 4.5  5.2 0.05  4.7
+95.7 96.4 0.05 96.1
+0  50 1 5
+0 360 1 310
+0  90 1 80
+0 180 1 175
+0 100 1 20
+0 100 1 30
+0 300 1 50
+-10 10  1 0
+30
+5000
+10000
+10
+SUMATORA_20130121_r2
+4
+100
+%============================
+% DATA Format 
+% Number of OBS
+% Latitude Longitude East North UP Relative_Error (E,N,U) %Relative error = 0 means not use value
+% Rang of latitude (down, up limits, walk distance, initial value)
+% Rang of longitude (down, up limits, walk distance, initial value)
+% Rang of depth from surface (down, up limits, walk distance, initial value)
+% Rang of strike [ counter clock wise from north]  (down, up limits, walk distance, initial value)
+% Rang of dip angle (down, up limits, walk distance, initial value)
+% Rang of rake angle (down, up limits, walk distance, initial value)
+% Rang of length (down, up limits, walk distance, initial value)
+% Rang of width (down, up limits, walk distance, initial value)
+% Rang of slip (down, up limits, walk distance, initial value)
+% Rang of hyper-Parameter (down, up limits, walk distance, initial value)
+% Mu
+% Keep Sample (<Chain Sample) 
+% Chain Sample
+% Number of iterations
+% Out put directory
+% Type of aPriori Information 0:No info. 1:Mw 2:Meca 3:Mw+Meca 4:Meca+force_Mw 5:loc
+% --------------------------
+
+  

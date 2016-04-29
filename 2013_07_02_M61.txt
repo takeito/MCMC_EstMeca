@@ -1,0 +1,48 @@
+5
+4.98672473 96.6942314  0.395 0.795  0 1 1 0 
+4.70977675 96.8160381  1.420 0.640  0 1 1 0  
+4.58406069 96.6833167  4.310 1.350  0 1 1 0
+4.51974127 96.6281543  2.200 1.430  0 1 1 0
+4.45897289 96.5191193  0.177 1.438  0 1 1 0
+%============================
+35  90   30
+305  60  180
+6.1
+%============================
+ 4.3  5.0 0.02  4.7
+96.2 97.3 0.02 96.5
+0  50 1 5
+0 360 1 35
+0  90 1 80
+0 180 1 30
+0 100 1 20
+0 100 1 20
+0 300 1 50
+-10 10  1 0
+30
+10000000
+100000000
+SUMATORA_20130702_r2
+4
+%============================
+% DATA Format 
+% Number of OBS
+% Latitude Longitude East North UP Relative_Error (E,N,U) %Relative error = 0 means not use value
+% Rang of latitude (down, up limits, walk distance, initial value)
+% Rang of longitude (down, up limits, walk distance, initial value)
+% Rang of depth from surface (down, up limits, walk distance, initial value)
+% Rang of strike [ counter clock wise from north]  (down, up limits, walk distance, initial value)
+% Rang of dip angle (down, up limits, walk distance, initial value)
+% Rang of rake angle (down, up limits, walk distance, initial value)
+% Rang of length (down, up limits, walk distance, initial value)
+% Rang of width (down, up limits, walk distance, initial value)
+% Rang of slip (down, up limits, walk distance, initial value)
+% Rang of hyper-Parameter (down, up limits, walk distance, initial value)
+% Mu
+% Keep Sample
+% Number of iterations
+% Out put directory
+% Type of aPriori Information 0:No info. 1:Mw 2:Meca 3:Mw+Meca 4:Meca+force_Mw
+% --------------------------
+
+  
