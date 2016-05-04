@@ -91,7 +91,7 @@ while not(COUNT==2)
       NACC=NACC+sum(IND_M);
     end
   end
-  AJR=NACC/LDIM;
+  AJR=NACC./LDIM;
   fprintf('T=%3d MaxRes=%6.3f MinRes=%6.3f Accept=%5.1f RWD=%5.2f Time=%5.1fsec\n',...
            RT,1-max(RES.OLD)./RR,1-min(RES.OLD)./RR,100*AJR,RWD,toc)
   [LAT,LON,DEP,STR,DIP,RAK,LEN,WID,SLP,TNS,LAM]=UPD_STPM_MCMC(LAT,LON,DEP,STR,DIP,RAK,LEN,WID,SLP,TNS,LAM,PRM);
