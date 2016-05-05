@@ -3,7 +3,7 @@
 %	OLAT, OLON  : Coordinates of observation points (Latitude, Longitude)
 %	ALAT0,ALON0 : Coordinates of the fault centroid (Latitude, Longitude)
 %	DEP         : Depth of the fault top (DEP > 0)
-%	PHAI        : Strike-angle from Norh counterclock wise (in degrees)
+%	PHAI        : Strike-angle from Norh clock wise (in degrees)
 %                 fault dips to the right side of the trace
 %	DIP         : Dip-angle  (in degrees, must be scalar)
 %	RAK         : Rake-angle (in degrees, must be scalar)
@@ -13,6 +13,7 @@
 %-------------------
 % coded by T.Ito AUG 2013
 % modified by T.Ito Feb. 2016
+% modified by T.Ito June 2016
 function [U]=DISLOC_RECT(OLAT,OLON,ALAT0,ALON0,DEP,PHAI,DIP,RAK,AL,AW,NU)
 RAD=pi./180;
 nsite=length(OLAT);
@@ -23,8 +24,8 @@ CR=cos(RAK.*RAD);
 SD=sin(DIP.*RAD);
 CD=cos(DIP.*RAD);
 %
-ST=sin(PHAI.*RAD);
-CT=cos(PHAI.*RAD);
+ST=sin((PHAI-90).*RAD);
+CT=cos((PHAI-90).*RAD);
 %
 CD(abs(CD)<=1.0e-3)=0;
 %
@@ -46,8 +47,8 @@ AW=AW*1000;    % Unit km --> m
 % DEP is fault's top edge
 EC = Xobs + CT.*CD.*AW/2;
 NC = Yobs - ST.*CD.*AW/2;
-X = CT.*NC + ST.*EC + AL/2;
-Y = ST.*NC - CT.*EC + CD.*AW;
+X  = CT.*NC - ST.*EC + AL/2;
+Y  = ST.*NC + CT.*EC + CD.*AW;
 % Variable substitution (independent from xi and eta)
 P = Y.*CD + DEP.*SD.*ones(nsite,1);
 Q = Y.*SD - DEP.*CD.*ones(nsite,1);
@@ -79,11 +80,11 @@ Uxs=Uxs+uxs; Uys=Uys+uys; Uzs=Uzs+uzs;
 Uxd=Uxd+uxd; Uyd=Uyd+uyd; Uzd=Uzd+uzd;
 Uxt=Uxt+uxt; Uyt=Uyt+uyt; Uzt=Uzt+uzt;
 %
-U.E=(-CR.*( Uxs(:).*ST-Uys(:).*CT)-SR.*( Uxd(:).*ST-Uyd(:).*CT))./(2*pi); %E
-U.N=(-CR.*( Uxs(:).*CT+Uys(:).*ST)-SR.*( Uxd(:).*CT+Uyd(:).*ST))./(2*pi); %N
+U.E=(-CR.*( Uxs(:).*CT+Uys(:).*ST)-SR.*( Uxd(:).*CT+Uyd(:).*ST))./(2*pi); %E
+U.N=(-CR.*(-Uxs(:).*ST+Uys(:).*CT)-SR.*(-Uxd(:).*ST+Uyd(:).*CT))./(2*pi); %N
 U.U=(-CR.*( Uzs(:)               )-SR.*( Uzd(:)               ))./(2*pi); %D
-U.Et=(Uxt(:).*ST-Uyt(:).*CT)./(2*pi); %E
-U.Nt=(Uxt(:).*CT+Uyt(:).*ST)./(2*pi); %N
+U.Et=( Uxt(:).*CT+Uyt(:).*ST)./(2*pi); %E
+U.Nt=(-Uxt(:).*ST+Uyt(:).*CT)./(2*pi); %N
 U.Ut=(Uzt(:)               )./(2*pi); %D
 %
 end
