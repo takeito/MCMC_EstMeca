@@ -26,7 +26,7 @@ SLIP_APR2=repmat(SLIP_VEC(d2r*PRM.ASTR(2),d2r*PRM.ADIP(2),d2r*PRM.ARAK(2)),1,PRM
 %%
 RT=0;
 COUNT=0;
-RR=sum((PRM.NERE.*PRM.OBSE).^2)+sum((PRM.NERN.*PRM.OBSN).^2)+sum((PRM.NERU.*PRM.OBSU).^2);
+RR=sum(PRM.NERE.*PRM.OBSE.^2)+sum(PRM.NERN.*PRM.OBSN.^2)+sum(PRM.NERU.*PRM.OBSU.^2);
 while not(COUNT==2)
   RT=RT+1;
   NACC=0;tic
@@ -34,19 +34,20 @@ while not(COUNT==2)
     [LAT,LON,DEP,STR,DIP,RAK,LEN,WID,SLP,TNS,LAM]=RWR_PARM_MCMC(LAT,LON,DEP,STR,DIP,RAK,LEN,WID,SLP,TNS,LAM,RWD,PRM);
     if PRM.PR==4; SLP.SMP=100.*10^(PRM.AMW.*1.5+9.1)./(PRM.MU.*LEN.SMP.*WID.SMP.*1000.*1000); end
     if DPP==1; DRP.SMP=(2/pi).*PRM.MU.*((SLP.SMP.*0.01)./(WID.SMP*1000)); end % strike slip for surface break dip slip is DRP*4/3
-    MW.SMP=(log10(PRM.MU.*LEN.SMP.*WID.SMP.*1000.*1000.*0.01)-9.1)./1.5;
+    MW.SMP=(log10(PRM.MU.*SLP.SMP.*LEN.SMP.*WID.SMP.*1000.*1000.*0.01)-9.1)./1.5;
     Rtime=Rtime+1;
     U=DISLOC_RECT_P(PRM.OLAT,PRM.OLON,LAT.SMP(1,:),LON.SMP(1,:),DEP.SMP(1,:),STR.SMP(1,:),DIP.SMP(1,:),RAK.SMP(1,:),LEN.SMP(1,:),WID.SMP(1,:),0.25);
     RES.SMP(1,:)=sum(bsxfun(@times,bsxfun(@plus,-(bsxfun(@times,U.E,SLP.SMP(1,:))+bsxfun(@times,U.Et,TNS.SMP(1,:))),PRM.OBSE).^2,PRM.NERE))+...
                  sum(bsxfun(@times,bsxfun(@plus,-(bsxfun(@times,U.N,SLP.SMP(1,:))+bsxfun(@times,U.Nt,TNS.SMP(1,:))),PRM.OBSN).^2,PRM.NERN))+...
                  sum(bsxfun(@times,bsxfun(@plus,-(bsxfun(@times,U.U,SLP.SMP(1,:))+bsxfun(@times,U.Ut,TNS.SMP(1,:))),PRM.OBSU).^2,PRM.NERU));
-    
-%    for NN=1:PRM.NPL
-%      U=DISLOC_RECT(PRM.OLAT,PRM.OLON,LAT.SMP(1,NN),LON.SMP(1,NN),DEP.SMP(1,NN),STR.SMP(1,NN),DIP.SMP(1,NN),RAK.SMP(1,NN),LEN.SMP(1,NN),WID.SMP(1,NN),0.25);
-%      RES.SMP(1,NN)=sum(PRM.NERE.*(PRM.OBSE-SLP.SMP(1,NN).*U.E-TNS.SMP(1,NN).*U.Et).^2)+...
-%                    sum(PRM.NERN.*(PRM.OBSN-SLP.SMP(1,NN).*U.N-TNS.SMP(1,NN).*U.Nt).^2)+...
-%                    sum(PRM.NERU.*(PRM.OBSU-SLP.SMP(1,NN).*U.U-TNS.SMP(1,NN).*U.Ut).^2);
-%    end
+%{    
+    for NN=1:PRM.NPL
+      U=DISLOC_RECT(PRM.OLAT,PRM.OLON,LAT.SMP(1,NN),LON.SMP(1,NN),DEP.SMP(1,NN),STR.SMP(1,NN),DIP.SMP(1,NN),RAK.SMP(1,NN),LEN.SMP(1,NN),WID.SMP(1,NN),0.25);
+      RES.SMP(1,NN)=sum(PRM.NERE.*(PRM.OBSE-SLP.SMP(1,NN).*U.E-TNS.SMP(1,NN).*U.Et).^2)+...
+                    sum(PRM.NERN.*(PRM.OBSN-SLP.SMP(1,NN).*U.N-TNS.SMP(1,NN).*U.Nt).^2)+...
+                    sum(PRM.NERU.*(PRM.OBSU-SLP.SMP(1,NN).*U.U-TNS.SMP(1,NN).*U.Ut).^2);
+    end
+%}
     if PRM.PR==0
       dPr.SMP=ones(size(RES.SMP));
       PDF=expm1(0.5.*(-RES.SMP+RES.OLD))+1;
@@ -60,8 +61,8 @@ while not(COUNT==2)
         dPr.SMP=min([SLIP_D1'*SLIP_D1;SLIP_D2'*SLIP_D2]);
       elseif PRM.PR==3
         SLIP_V=SLIP_VEC(d2r*STR.SMP,d2r*DIP.SMP,d2r*RAK.SMP);
-        SLIP_D1=MW.SMP.*SLIP_V-PRM.AMW.*SLIP_APR1;
-        SLIP_D2=MW.SMP.*SLIP_V-PRM.AMW.*SLIP_APR2;
+        SLIP_D1=bsxfun(@times,SLIP_V,MW.SMP)-PRM.AMW.*SLIP_APR1;
+        SLIP_D2=bsxfun(@times,SLIP_V,MW.SMP)-PRM.AMW.*SLIP_APR2;
         dPr.SMP=min([SLIP_D1'*SLIP_D1;SLIP_D2'*SLIP_D2]);
       elseif PRM.PR==5;
         [X,Y]=PLTXY(LAT.SMP,LON.SMP,PRM.PLAT(4),PRM.PLON(4));
@@ -94,10 +95,17 @@ while not(COUNT==2)
   fprintf('T=%3d MaxRes=%6.3f MinRes=%6.3f Accept=%5.1f RWD=%5.2f Time=%5.1fsec\n',...
            RT,1-max(RES.OLD)./RR,1-min(RES.OLD)./RR,100*AJR,RWD,toc)
   [LAT,LON,DEP,STR,DIP,RAK,LEN,WID,SLP,TNS,LAM]=UPD_STPM_MCMC(LAT,LON,DEP,STR,DIP,RAK,LEN,WID,SLP,TNS,LAM,PRM);
-  fprintf('Lat.   Lon.    Depth Str.   Dip   Rake    Len.   Wid.   Slip   Tens.  LAM    Re\n') 
-  fprintf('%6.3f %7.3f %5.2f %6.2f %5.2f %6.2f %6.2f %6.2f %6.1f %6.1f %6.2f %6.1f \n',...
+  fprintf('Lat.   Lon.    Depth Str.   Dip   Rake    Len.   Wid.   Slip   Tens.  LAM    Mw    Re\n') 
+  fprintf('%6.3f %7.3f %5.2f %6.2f %5.2f %6.2f %6.2f %6.2f %6.1f %6.1f %6.1f %4.2f %6.1f \n',...
   mean(LAT.OLD),mean(LON.OLD),mean(DEP.OLD),mean(STR.OLD),mean(DIP.OLD),mean(RAK.OLD),...
-  mean(LEN.OLD),mean(WID.OLD),mean(SLP.OLD),mean(TNS.OLD),mean(LAM.OLD),min(RES.OLD)) 
+  mean(LEN.OLD),mean(WID.OLD),mean(SLP.OLD),mean(TNS.OLD),mean(LAM.OLD),mean(MW.OLD),min(RES.OLD)) 
+  %if PRM.SHOW==1;
+  %  figure(100)
+  %  plot(PRM.OLON,PRM.OLAT,'s','MarkerSize',10,'MarkerEdgeColor','k','MarkerFaceColor','g')
+  %  quiver(PRM.OLON,PRM.OLAT,PRM.OBSE,PRM.OBSN)
+  %  drown now 
+  %  quiver(PRM.OLON,PRM.OLAT,PRM.OBSE,PRM.OBSN)
+  %end
   if AJR > 0.24
     RWD=RWD*1.1;
   elseif AJR < 0.22
@@ -187,7 +195,7 @@ fprintf('==================\n')
 fprintf('Mu(GPa), Keep, Chain and Itration Sample: %5.1f %3.1e %3.1e %3.1e \n',[PRM.MU./1e9 PRM.KEEP PRM.CHIN PRM.RTIM]) 
 fprintf('OUT_DIR: %s \n',PRM.OUTD) 
 fprintf('index_Pr: %i \n',PRM.PR) 
-fprintf('Number of Pallarel: %i \n',PRM.NPL)
+fprintf('Number of Parallel: %i \n',PRM.NPL)
 if PRM.SHOW==1;
   figure(100)
   plot(PRM.OLON,PRM.OLAT,'s','MarkerSize',10,'MarkerEdgeColor','k','MarkerFaceColor','g')
@@ -372,7 +380,7 @@ DRP.CHA(:,SN:EN)=DRP.SMP;
 MW.CHA(:,SN:EN)=MW.SMP;
 end
 %% UPDATE STD AND PARAMETERS
-function [LAT,LON,DEP,STR,DIP,RAK,LEN,WID,SLP,TNS,LAM]=UPD_STPM_MCMC(LAT,LON,DEP,STR,DIP,RAK,LEN,WID,SLP,LAM,TNS,PRM)
+function [LAT,LON,DEP,STR,DIP,RAK,LEN,WID,SLP,TNS,LAM]=UPD_STPM_MCMC(LAT,LON,DEP,STR,DIP,RAK,LEN,WID,SLP,TNS,LAM,PRM)
 LAT.STD=repmat(std(LAT.CHA,1,2),1,PRM.NPL);
 LON.STD=repmat(std(LON.CHA,1,2),1,PRM.NPL);
 DEP.STD=repmat(std(DEP.CHA,1,2),1,PRM.NPL);
@@ -383,18 +391,18 @@ LEN.STD=repmat(std(LEN.CHA,1,2),1,PRM.NPL);
 WID.STD=repmat(std(WID.CHA,1,2),1,PRM.NPL);
 SLP.STD=repmat(std(SLP.CHA,1,2),1,PRM.NPL);
 TNS.STD=repmat(std(TNS.CHA,1,2),1,PRM.NPL);
-LAM.OLD=repmat(mean(LAM.CHA,2),1,PRM.NPL);
-LAT.OLD=repmat(mean(LAT.CHA,2),1,PRM.NPL);
-LON.OLD=repmat(mean(LON.CHA,2),1,PRM.NPL);
-DEP.OLD=repmat(mean(DEP.CHA,2),1,PRM.NPL);
-STR.OLD=repmat(mean(STR.CHA,2),1,PRM.NPL);
-DIP.OLD=repmat(mean(DIP.CHA,2),1,PRM.NPL);
-RAK.OLD=repmat(mean(RAK.CHA,2),1,PRM.NPL);
-LEN.OLD=repmat(mean(LEN.CHA,2),1,PRM.NPL);
-WID.OLD=repmat(mean(WID.CHA,2),1,PRM.NPL);
-SLP.OLD=repmat(mean(SLP.CHA,2),1,PRM.NPL);
-TNS.OLD=repmat(mean(TNS.CHA,2),1,PRM.NPL);
-LAM.OLD=repmat(mean(LAM.CHA,2),1,PRM.NPL);
+LAM.OLD=repmat(median(LAM.CHA,2),1,PRM.NPL);
+LAT.OLD=repmat(median(LAT.CHA,2),1,PRM.NPL);
+LON.OLD=repmat(median(LON.CHA,2),1,PRM.NPL);
+DEP.OLD=repmat(median(DEP.CHA,2),1,PRM.NPL);
+STR.OLD=repmat(median(STR.CHA,2),1,PRM.NPL);
+DIP.OLD=repmat(median(DIP.CHA,2),1,PRM.NPL);
+RAK.OLD=repmat(median(RAK.CHA,2),1,PRM.NPL);
+LEN.OLD=repmat(median(LEN.CHA,2),1,PRM.NPL);
+WID.OLD=repmat(median(WID.CHA,2),1,PRM.NPL);
+SLP.OLD=repmat(median(SLP.CHA,2),1,PRM.NPL);
+TNS.OLD=repmat(median(TNS.CHA,2),1,PRM.NPL);
+LAM.OLD=repmat(median(LAM.CHA,2),1,PRM.NPL);
 end
 %% MAKE FIGURES
 function MAKE_FIGS(KEEP)
