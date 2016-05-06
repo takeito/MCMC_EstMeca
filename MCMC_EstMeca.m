@@ -36,12 +36,17 @@ while not(COUNT==2)
     if DPP==1; DRP.SMP=(2/pi).*PRM.MU.*((SLP.SMP.*0.01)./(WID.SMP*1000)); end % strike slip for surface break dip slip is DRP*4/3
     MW.SMP=(log10(PRM.MU.*LEN.SMP.*WID.SMP.*1000.*1000.*0.01)-9.1)./1.5;
     Rtime=Rtime+1;
-    for NN=1:PRM.NPL
-      U=DISLOC_RECT(PRM.OLAT,PRM.OLON,LAT.SMP(1,NN),LON.SMP(1,NN),DEP.SMP(1,NN),STR.SMP(1,NN),DIP.SMP(1,NN),RAK.SMP(1,NN),LEN.SMP(1,NN),WID.SMP(1,NN),0.25);
-      RES.SMP(1,NN)=sum(PRM.NERE.*(PRM.OBSE-SLP.SMP(1,NN).*U.E-TNS.SMP(1,NN).*U.Et).^2)+...
-                    sum(PRM.NERN.*(PRM.OBSN-SLP.SMP(1,NN).*U.N-TNS.SMP(1,NN).*U.Nt).^2)+...
-                    sum(PRM.NERU.*(PRM.OBSU-SLP.SMP(1,NN).*U.U-TNS.SMP(1,NN).*U.Ut).^2);
-    end
+    U=DISLOC_RECT_P(PRM.OLAT,PRM.OLON,LAT.SMP(1,:),LON.SMP(1,:),DEP.SMP(1,:),STR.SMP(1,:),DIP.SMP(1,:),RAK.SMP(1,:),LEN.SMP(1,:),WID.SMP(1,:),0.25);
+    RES.SMP(1,:)=sum(bsxfun(@times,bsxfun(@plus,-(bsxfun(@times,U.E,SLP.SMP(1,:))+bsxfun(@times,U.Et,TNS.SMP(1,:))),PRM.OBSE).^2,PRM.NERE))+...
+                 sum(bsxfun(@times,bsxfun(@plus,-(bsxfun(@times,U.N,SLP.SMP(1,:))+bsxfun(@times,U.Nt,TNS.SMP(1,:))),PRM.OBSN).^2,PRM.NERN))+...
+                 sum(bsxfun(@times,bsxfun(@plus,-(bsxfun(@times,U.U,SLP.SMP(1,:))+bsxfun(@times,U.Ut,TNS.SMP(1,:))),PRM.OBSU).^2,PRM.NERU));
+    
+%    for NN=1:PRM.NPL
+%      U=DISLOC_RECT(PRM.OLAT,PRM.OLON,LAT.SMP(1,NN),LON.SMP(1,NN),DEP.SMP(1,NN),STR.SMP(1,NN),DIP.SMP(1,NN),RAK.SMP(1,NN),LEN.SMP(1,NN),WID.SMP(1,NN),0.25);
+%      RES.SMP(1,NN)=sum(PRM.NERE.*(PRM.OBSE-SLP.SMP(1,NN).*U.E-TNS.SMP(1,NN).*U.Et).^2)+...
+%                    sum(PRM.NERN.*(PRM.OBSN-SLP.SMP(1,NN).*U.N-TNS.SMP(1,NN).*U.Nt).^2)+...
+%                    sum(PRM.NERU.*(PRM.OBSU-SLP.SMP(1,NN).*U.U-TNS.SMP(1,NN).*U.Ut).^2);
+%    end
     if PRM.PR==0
       dPr.SMP=ones(size(RES.SMP));
       PDF=expm1(0.5.*(-RES.SMP+RES.OLD))+1;
@@ -152,6 +157,7 @@ PRM.RTIM=fscanf(Fid,'%f \n',[1,1]);
 PRM.OUTD=fscanf(Fid,'%s \n',[1,1]);
 PRM.PR=fscanf(Fid,'%d \n',[1,1]);
 PRM.NPL=fscanf(Fid,'%d \n',[1,1]);
+PRM.SHOW=fscanf(Fid,'%d \n',[1,1]);
 fclose(Fid);
 %-------------------
 fprintf('==================\nINPUT DATA\n==================\n') 
@@ -182,9 +188,11 @@ fprintf('Mu(GPa), Keep, Chain and Itration Sample: %5.1f %3.1e %3.1e %3.1e \n',[
 fprintf('OUT_DIR: %s \n',PRM.OUTD) 
 fprintf('index_Pr: %i \n',PRM.PR) 
 fprintf('Number of Pallarel: %i \n',PRM.NPL)
-%figure(100)
-%plot(PRM.OLON,PRM.OLAT,'s','MarkerSize',10,'MarkerEdgeColor','k','MarkerFaceColor','g')
-%quiver(PRM.OLON,PRM.OLAT,PRM.OBSE,PRM.OBSN)
+if PRM.SHOW==1;
+  figure(100)
+  plot(PRM.OLON,PRM.OLAT,'s','MarkerSize',10,'MarkerEdgeColor','k','MarkerFaceColor','g')
+  quiver(PRM.OLON,PRM.OLAT,PRM.OBSE,PRM.OBSN)
+end
 end
 %% Init PARAMETERS
 function [LAT,LON,DEP,STR,DIP,RAK,LEN,WID,SLP,TNS,LAM,RES,DRP,MW,dPr]=INT_PARM_MCMC(PRM)
