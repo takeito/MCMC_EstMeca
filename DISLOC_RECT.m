@@ -107,7 +107,7 @@ lR  = log(Re);
 qre = q./(R.*Re);
 qrx = q./(R.*(R + xi));
 NU12=1-2*nu;
-if cd == 0
+if cd ~= 0
   I5 =  NU12 * 2./cd .* atan((eta.*(X + q.*cd) + X.*(R + X).*sd)) ./(xi.*(R + X).*cd);
   I5(xi==0) = 0;
   I4 =  NU12 * 1./cd * (log(Rb) - sd.*lR);

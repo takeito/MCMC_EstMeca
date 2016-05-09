@@ -117,21 +117,19 @@ sdcd=sd.*cd;
 xiqre=xi.*qre;
 NU12=1-2*nu;
 %
-I5 = -NU12   * bsxfun(@times,xi,sd)./Rb;
-I4 = -NU12   * q./Rb;
-I3 =  NU12/2 * (eta./Rb + yb.*q./Rb.^2 - lR);
-I2 =  NU12   * (-lR) - I3;
-I1 = -NU12/2 * xi.*q./Rb.^2;
+I5 = bsxfun(@times,atan((eta.*(X+bsxfun(@times,q,cd)+...
+     X.*bsxfun(@times,R+X,sd))))./(xi.*(bsxfun(@times,R+X,cd))),NU12*2./cd);
+I5(xi==0) = 0;
+I4 = NU12.*bsxfun(@times,log(Rb) - bsxfun(@times,lR,sd),1./cd);
+I3 = NU12*( yb./cR) + bsxfun(@times,I4,sd./cd) - lR ;
+I1 = NU12*(-xi./cR) - bsxfun(@times,I5,sd./cd);
 %
 IND=cd==0;
-I5(:,IND) = bsxfun(@times,...
-            atan((eta(:,IND).*(X(:,IND)+bsxfun(@times,q(:,IND),cd(IND))+...
-                    X(:,IND).* bsxfun(@times,R(:,IND)+X(:,IND),sd(IND)))))./...
-                  (xi(:,IND).*(bsxfun(@times,R(:,IND)+X(:,IND),cd(IND)))),NU12*2./cd(IND));
-I5(xi==0) = 0;
-I4(:,IND) = bsxfun(@times,log(Rb(:,IND)) - bsxfun(@times,lR(:,IND),sd(IND)),NU12./cd(IND));
-I3(:,IND) = NU12*( yb(:,IND)./cR(:,IND)) + bsxfun(@times,I4(:,IND),sd(IND)./cd(IND)) - lR(:,IND) ;
-I1(:,IND) = NU12*(-xi(:,IND)./cR(:,IND)) - bsxfun(@times,I5(:,IND),sd(IND)./cd(IND));
+I5(:,IND) = -NU12   * bsxfun(@times,xi(:,IND),sd(IND))./Rb(:,IND);
+I4(:,IND) = -NU12   * q(:,IND)./Rb(:,IND);
+I3(:,IND) =  NU12/2 * (eta(:,IND)./Rb(:,IND) + yb(:,IND).*q(:,IND)./Rb(:,IND).^2 - lR(:,IND));
+I2(:,IND) =  NU12   * (-lR(:,IND)) - I3(:,IND);
+I1(:,IND) = -NU12/2 * xi(:,IND).*q(:,IND)./Rb(:,IND).^2;
 %
 Uxs  =    xiqre + bsxfun(@times,I1,sd);
 Uys  =  yb.*qre + q.*bsxfun(@ldivide,Re,cd) + bsxfun(@times,I2,sd);
