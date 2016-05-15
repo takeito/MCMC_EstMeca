@@ -33,6 +33,10 @@ CD(abs(CD)<=1.0e-3)=0;
 SD(CD==0 & SD > 0)=1;
 SD(CD==0 & SD < 0)=-1;
 %
+OLAT
+OLON
+ALAT0
+ALON0
 [Xobs,Yobs]=PLTXY_P(OLAT,OLON,ALAT0,ALON0);
 %
 %	X,Y : Coordinates of observation points (relative to fault center at top)
@@ -48,12 +52,16 @@ AW2=AW/2;
 % Converts fault coordinates (E,N,DEPTH) relative to centroid
 % into Okada's reference system (X,Y,DEP)
 % DEP is fault's top edge
-%EC = bsxfun(@plus, Xobs,CT.*CD.*AW2);
-%NC = bsxfun(@minus,Yobs,ST.*CD.*AW2);
-%X =  bsxfun(@times,EC,CT) - bsxfun(@plus,bsxfun(@times,NC,ST),AL./2);
-%Y =  bsxfun(@times,EC,ST) + bsxfun(@plus,bsxfun(@times,NC,CT),CD.*AW);
-X =  bsxfun(@times,Xobs,CT) - bsxfun(@plus,bsxfun(@times,Yobs,ST),AL./2);
-Y =  bsxfun(@times,Xobs,ST) + bsxfun(@plus,bsxfun(@times,Yobs,CT),CD.*AW);
+X = bsxfun(@times,Xobs,CT) - bsxfun(@times,Yobs,ST);
+Y = bsxfun(@times,Xobs,ST) + bsxfun(@times,Yobs,CT);
+%X =  bsxfun(@times,NC,CT) - bsxfun(@plus,bsxfun(@times,EC,ST),AL2);
+%Y =  bsxfun(@times,NC,ST) + bsxfun(@plus,bsxfun(@times,EC,CT),CD.*AW);
+%X =  bsxfun(@times,Xobs,CT) - bsxfun(@plus,bsxfun(@times,Yobs,ST),AL./2);
+%Y =  bsxfun(@times,Xobs,ST) + bsxfun(@plus,bsxfun(@times,Yobs,CT),CD.*AW);
+figure(201)
+plot(Xobs,Yobs,'.')
+figure(202)
+plot(X,Y,'.')
 % Variable substitution (independent from xi and eta)
 P = bsxfun(@plus, bsxfun(@times,Y,CD),(DEP+SD.*AW).*SD);
 Q = bsxfun(@minus,bsxfun(@times,Y,SD),(DEP+SD.*AW).*CD);
@@ -167,11 +175,11 @@ end
 %-------------------
 % coded by T.Ito June 2016
 function [X,Y]=PLTXY_P(ALAT,ALON,ALAT0,ALON0)
-A  =6.378160e3;
-E2 =6.6944541e-3;
-E12=6.7395719e-3;
-D=180/pi;
-RD=1.0/D;
+A    = 6.378160e3;
+E2   = 6.6944541e-3;
+E12  = 6.7395719e-3;
+D    = 180/pi;
+RD   = 1.0/D;
 RLAT = RD.*ALAT;
 SLAT = sin(RLAT);
 CLAT = cos(RLAT);
@@ -179,6 +187,6 @@ AL   = bsxfun(@minus,ALON,ALON0);
 PH1  = bsxfun(@plus,bsxfun(@times,AL.^2,((1.0 + E12.*CLAT.^2).*SLAT.*CLAT)./(2.0*D)),ALAT);
 AN   = A./sqrt(1.0-E2.*sin(PH1.*RD).^2);
 PAR  = bsxfun(@plus,PH1,ALAT0).*RD;
-Y    = A.*(1.0-E2)./sqrt((1.0-E2.*sin(PAR.*0.5).^2).^3).*PAR;
-X    = bsxfun(@ldivide,bsxfun(@minus,AL,CLAT),D./AN)+bsxfun(@ldivide,bsxfun(@times,AL.^3,CLAT.*cos(2.0.*RLAT)),(6.0./AN.*D.^3));
+Y    = (A.*(1.0-E2)./sqrt((1.0-E2.*sin(PAR.*0.5).^2).^3)).*PAR;
+X    = bsxfun(@rdivide,bsxfun(@minus,AL,CLAT),D./AN)+bsxfun(@rdivide,bsxfun(@times,AL.^3,CLAT.*cos(2.0.*RLAT)),(6.0./AN.*D.^3));
 end
